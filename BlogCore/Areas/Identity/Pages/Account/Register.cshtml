@@ -62,14 +62,14 @@
 
             
             <!--Autorización-->
-            @if (User.IsInRole(CNT.Administrador))
+            @if (User.IsInRole(CNT.GestorDeTickets))
             {
                 <!--Selector de Roles-->
                 <div class="form-group row">
                     <div class="col-6"><h4>Seleccionar Rol de Usuario</h4></div>
                     <div class="col-5">
-                        <input type="radio" name="radUsuarioRole" value="@CNT.Administrador" /> @CNT.Administrador
-                        <input type="radio" name="radUsuarioRole" value="@CNT.Registrado" /> @CNT.Registrado
+                        <input type="radio" name="radUsuarioRole" value="@CNT.GestorDeTickets" /> @CNT.GestorDeTickets
+                        <input type="radio" name="radUsuarioRole" value="@CNT.AgenteSoporte" /> @CNT.AgenteSoporte
                     </div>
                 </div>
                 

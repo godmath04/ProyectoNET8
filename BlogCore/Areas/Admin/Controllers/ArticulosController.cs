@@ -1,11 +1,12 @@
 ﻿using BlogCore.AccesoDatos.Data.Repository.IRepository;
 using BlogCore.Models.ViewModels;
+using BlogCore.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogCore.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = CNT.GestorDeTickets)]
     [Area("Admin")]
     public class ArticulosController : Controller
     {
@@ -153,39 +154,12 @@ namespace BlogCore.Areas.Admin.Controllers
             artiVM.ListaCategorias = _contenedorTrabajo.Categoria.GetListaCategorias();
             return View(artiVM);
         }
-
-
-
-
-        #region Llamadas a la API
+        #region LLamadas a la API
         [HttpGet]
         public IActionResult GetAll()
         {
             return Json(new { data = _contenedorTrabajo.Articulo.GetAll(includeProperties: "Categoria") });
         }
-
-        [HttpDelete]
-        public IActionResult Delete(int id)
-        {
-            var articuloDesdeBd = _contenedorTrabajo.Articulo.Get(id);
-            string rutaDirectorioPrincipal = _hostingEnvironment.WebRootPath;
-            var rutaImagen = Path.Combine(rutaDirectorioPrincipal, articuloDesdeBd.UrlImagen.TrimStart('\\'));
-            if (System.IO.File.Exists(rutaImagen))
-            {
-                System.IO.File.Delete(rutaImagen);
-            }
-
-
-            if (articuloDesdeBd == null)
-            {
-                return Json(new { success = false, message = "Error borrando artículo" });
-            }
-
-            _contenedorTrabajo.Articulo.Remove(articuloDesdeBd);
-            _contenedorTrabajo.Save();
-            return Json(new { success = true, message = "Artículo Borrado Correctamente" });
-        }
-
         #endregion
     }
 }

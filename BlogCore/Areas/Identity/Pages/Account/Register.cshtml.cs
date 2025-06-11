@@ -154,30 +154,30 @@ namespace BlogCore.Areas.Identity.Pages.Account
                 {
 
                     //Aquí validamos si los roles existen sino se crean
-                    if (!await _roleManager.RoleExistsAsync(CNT.Administrador))
+                    if (!await _roleManager.RoleExistsAsync(CNT.GestorDeTickets))
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(CNT.Administrador));
-                        await _roleManager.CreateAsync(new IdentityRole(CNT.Registrado));
-                        await _roleManager.CreateAsync(new IdentityRole(CNT.Cliente));
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.GestorDeTickets));
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.AgenteSoporte));
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.Solicitante));
                     }
 
                     //Obtenemos el rol seleccionado
                     string rol = Request.Form["radUsuarioRole"].ToString();
 
                     //Validamos si el rol seleccionado es Admin y si lo es lo agregamos
-                    if (rol == CNT.Administrador)
+                    if (rol == CNT.GestorDeTickets)
                     {
-                        await _userManager.AddToRoleAsync(user, CNT.Administrador);
+                        await _userManager.AddToRoleAsync(user, CNT.GestorDeTickets);
                     }
                     else
                     {
-                        if (rol == CNT.Registrado)
+                        if (rol == CNT.AgenteSoporte)
                         {
-                            await _userManager.AddToRoleAsync(user, CNT.Registrado);
+                            await _userManager.AddToRoleAsync(user, CNT.AgenteSoporte);
                         }
                         else
                         {
-                            await _userManager.AddToRoleAsync(user, CNT.Cliente);
+                            await _userManager.AddToRoleAsync(user, CNT.Solicitante);
                         }
                     }
 

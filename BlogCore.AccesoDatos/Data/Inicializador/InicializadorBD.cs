@@ -27,37 +27,41 @@ namespace BlogCore.AccesoDatos.Data.Inicializador
         }
         public void Inicializar()
         {
-            try
+            // Aplicar migraciones pendientes
+            if (_bd.Database.GetPendingMigrations().Any())
             {
-                if(_bd.Database.GetPendingMigrations().Count() > 0)
-                {
-                    _bd.Database.Migrate();
+                _bd.Database.Migrate();
+            }
 
-                }
+            // Crear roles si no existen
+            if (!_roleManager.RoleExistsAsync(CNT.GestorDeTickets).Result)
+                _roleManager.CreateAsync(new IdentityRole(CNT.GestorDeTickets)).Wait();
+            if (!_roleManager.RoleExistsAsync(CNT.AgenteSoporte).Result)
+                _roleManager.CreateAsync(new IdentityRole(CNT.AgenteSoporte)).Wait();
+            if (!_roleManager.RoleExistsAsync(CNT.Solicitante).Result)
+                _roleManager.CreateAsync(new IdentityRole(CNT.Solicitante)).Wait();
 
-            }catch (Exception)
+            // Crear usuario admin si no existe
+            var usuario = _userManager.FindByEmailAsync("luispineda72@hotmail.com").Result;
+            if (usuario == null)
             {
-                if (_bd.Roles.Any(ro => ro.Name == CNT.Administrador )) return;
-
-                //Creacion de roles
-                _roleManager.CreateAsync(new IdentityRole(CNT.Administrador)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(CNT.Registrado)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(CNT.Cliente)).GetAwaiter().GetResult();
-
-
-                //Creacion del usuario inicial
                 _userManager.CreateAsync(new ApplicationUser
                 {
                     UserName = "luispineda72@hotmail.com",
                     Email = "luispineda72@hotmail.com",
                     EmailConfirmed = true,
                     Nombre = "Administrador"
+                }, "Admin@123").Wait();
 
-                }, "Admin@123").GetAwaiter().GetResult();
+                usuario = _bd.ApplicationUser.FirstOrDefault(u => u.Email == "luispineda72@hotmail.com");
+            }
 
-                ApplicationUser usuario = _bd.ApplicationUser.Where(us => us.Email == "luispineda72@hotmail.com").FirstOrDefault();
-                _userManager.AddToRoleAsync(usuario, CNT.Administrador).GetAwaiter().GetResult();
+            // Asignar rol al usuario si aún no lo tiene
+            if (!_userManager.IsInRoleAsync(usuario, CNT.GestorDeTickets).Result)
+            {
+                _userManager.AddToRoleAsync(usuario, CNT.GestorDeTickets).Wait();
             }
         }
+
     }
 }

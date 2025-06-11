@@ -8,8 +8,8 @@ namespace BlogCore.Utilidades
 {
     public class CNT
     {
-        public const string Administrador = "Administrador";
-        public const string Registrado = "Registrado";
-        public const string Cliente = "Cliente";
+        public const string GestorDeTickets = "GestorDeTickets";
+        public const string AgenteSoporte = "AgenteSoporte";
+        public const string Solicitante = "Solicitante";
     }
 }

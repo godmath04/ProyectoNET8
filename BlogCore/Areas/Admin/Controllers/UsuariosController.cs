@@ -28,17 +28,22 @@ namespace BlogCore.Areas.Admin.Controllers
             var usuarioActual = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
             return View(_contenedorTrabajo.Usuario.GetAll(u => u.Id != usuarioActual.Value));
         }
+        [Authorize(Roles = CNT.GestorDeTickets + "," + CNT.AgenteSoporte)]
 
-        [HttpGet]
+        [Authorize(Roles = CNT.GestorDeTickets + "," + CNT.AgenteSoporte)]
+        [HttpPost]
         public IActionResult Bloquear(string id)
         {
-            if (id == null)
-            {
+            var usuario = _contenedorTrabajo.Usuario.GetFirstOrDefault(u => u.Id == id);
+            if (usuario == null)
                 return NotFound();
-            }
-            _contenedorTrabajo.Usuario.BloquearUsuario(id);
+
+            usuario.LockoutEnd = DateTime.Now.AddYears(100); // bloqueo permanente
+            _contenedorTrabajo.Save();
+
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpGet]
         public IActionResult Desbloquear(string id)

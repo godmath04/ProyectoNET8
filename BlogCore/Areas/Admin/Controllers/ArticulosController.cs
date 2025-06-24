@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogCore.Areas.Admin.Controllers
 {
-    [Authorize(Roles = CNT.GestorDeTickets)]
+    [Authorize(Roles = CNT.GestorDeTickets +"," + CNT.AgenteSoporte)]
     [Area("Admin")]
     public class ArticulosController : Controller
     {

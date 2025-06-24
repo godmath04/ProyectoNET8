@@ -122,12 +122,14 @@ namespace BlogCore.Areas.Identity.Pages.Account
             public string PhoneNumber { get; set; }
         }
 
+        [Authorize(Roles = CNT.GestorDeTickets)]
 
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
+        [Authorize(Roles = CNT.GestorDeTickets)]
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {

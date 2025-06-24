@@ -7,18 +7,18 @@ namespace BlogCore.Controllers
 {
     public class AccountController : Controller
     {
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Logout()
-        {
-            return SignOut(
-                new AuthenticationProperties
-                {
-                    RedirectUri = "/"
-                },
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                OpenIdConnectDefaults.AuthenticationScheme
-            );
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Logout()
+        //{
+        //    return SignOut(
+        //        new AuthenticationProperties
+        //        {
+        //            RedirectUri = "/"
+        //        },
+        //        CookieAuthenticationDefaults.AuthenticationScheme,
+        //        OpenIdConnectDefaults.AuthenticationScheme
+        //    );
+        //}
     }
 }

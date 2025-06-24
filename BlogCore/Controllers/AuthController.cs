@@ -1,6 +1,7 @@
 ﻿using BlogCore.Utilidades;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -45,15 +46,19 @@ public class AuthController : Controller
     }
 
 
-
-
-
-
-
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult SignOut()
     {
-        return SignOut(new AuthenticationProperties { RedirectUri = "/" },
+        return SignOut(
+            new AuthenticationProperties
+            {
+                RedirectUri = "/"
+            },
             CookieAuthenticationDefaults.AuthenticationScheme,
-            "oidc");
+            OpenIdConnectDefaults.AuthenticationScheme
+        );
     }
+
+
 }

@@ -51,12 +51,19 @@ builder.Services.AddAuthentication(options =>
 {
     var kc = builder.Configuration.GetSection("Keycloak");
     options.Authority = kc["Authority"];
+
+    //Obtencion de endpoints
+    options.MetadataAddress = $"{kc["Authority"]}/.well-known/openid-configuration";
+    
     options.ClientId = kc["ClientId"];
     options.ClientSecret = kc["ClientSecret"];
     options.RequireHttpsMetadata = false;
     options.ResponseType = "code";
     options.SaveTokens = true;
     options.GetClaimsFromUserInfoEndpoint = true;
+
+    //Volver al home despues de logout
+    options.SignedOutRedirectUri = "/";
 
     options.Scope.Clear();
     options.Scope.Add("openid");

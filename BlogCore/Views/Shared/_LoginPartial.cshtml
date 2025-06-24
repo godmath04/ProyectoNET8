@@ -1,18 +1,17 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
+    @if (User.Identity?.IsAuthenticated == true)
     {
         <li class="nav-item">
-            <a class="nav-link text-white" href="#">Hola, @User.Identity?.Name!</a>
+            <span class="nav-link text-white">Hola, @User.Identity?.Name!</span>
         </li>
         <li class="nav-item">
-            <form class="form-inline" asp-area="" asp-controller="Auth" asp-action="SignOut" method="get">
-
-                <button type="submit" class="nav-link btn btn-link text-white">Cerrar Sesión</button>
+            <form class="form-inline" href="/Auth/SignOut asp-action="SignOut" asp-area="" method="post">
+                <button type="submit" class="nav-link btn btn-link">Cerrar Sesión</button>
             </form>
+
+
         </li>
     }
     else
@@ -22,3 +21,5 @@
         </li>
     }
 </ul>
+
+

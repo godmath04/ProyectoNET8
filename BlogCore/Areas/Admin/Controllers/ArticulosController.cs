@@ -160,6 +160,28 @@ namespace BlogCore.Areas.Admin.Controllers
         {
             return Json(new { data = _contenedorTrabajo.Articulo.GetAll(includeProperties: "Categoria") });
         }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var articuloDesdeBd = _contenedorTrabajo.Articulo.Get(id);
+            string rutaDirectorioPrincipal = _hostingEnvironment.WebRootPath;
+            var rutaImagen = Path.Combine(rutaDirectorioPrincipal, articuloDesdeBd.UrlImagen.TrimStart('\\'));
+            if (System.IO.File.Exists(rutaImagen))
+            {
+                System.IO.File.Delete(rutaImagen);
+            }
+
+
+            if (articuloDesdeBd == null)
+            {
+                return Json(new { success = false, message = "Error borrando artículo" });
+            }
+
+            _contenedorTrabajo.Articulo.Remove(articuloDesdeBd);
+            _contenedorTrabajo.Save();
+            return Json(new { success = true, message = "Artículo Borrado Correctamente" });
+        }
         #endregion
     }
 }

@@ -13,12 +13,9 @@
             <h2 class="text-center">Lista de Usuarios</h2>
         </div>
         <div class="col-6">
-            @if (User.IsInRole(CNT.GestorDeTickets))
-            {
-                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-info">
-                    <i class="fas fa-plus"></i> &nbsp; Registra un nuevo usuario
-                </a>
-            }
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-info">
+                <i class="fas fa-plus"></i> &nbsp; Registra un nuevo usuario
+            </a>
         </div>
     </div>
 
@@ -43,25 +40,16 @@
                         <td>
                             @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
                             {
-                                @if (User.IsInRole(CNT.GestorDeTickets) || User.IsInRole(CNT.AgenteSoporte))
-                                {
-                                    <form asp-action="Bloquear" method="post" asp-route-id="@item.Id" style="display:inline">
-                                        <button type="submit" class="btn btn-success text-white" style="width:50px">
-                                            <i class="fas fa-lock-open"></i>
-                                        </button>
-                                    </form>
-                                }
+                                <a class="btn btn-success text-white" asp-action="Bloquear" style="width:50px" asp-route-id="@item.Id">
+                                    <i class="fas fa-lock-open"></i>
+                                </a>
+                                
                             }
                             else
                             {
-                                @if (User.IsInRole(CNT.GestorDeTickets))
-                                {
-                                    <form asp-action="Desbloquear" method="post" asp-route-id="@item.Id" style="display:inline">
-                                        <button type="submit" class="btn btn-danger text-white" style="width:50px">
-                                            <i class="fas fa-lock"></i>
-                                        </button>
-                                    </form>
-                                }
+                                <a class="btn btn-danger text-white" asp-action="Desbloquear" style="width:50px" asp-route-id="@item.Id">
+                                    <i class="fas fa-lock"></i>
+                                </a>
                             }
                         </td>
 

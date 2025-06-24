@@ -7,10 +7,10 @@
             <span class="nav-link text-white">Hola, @User.Identity?.Name!</span>
         </li>
         <li class="nav-item">
-            <form class="form-inline" href="/Auth/SignOut asp-action="SignOut" asp-area="" method="post">
+            <form class="form-inline" method="post" action="/Auth/SignOut">
+                @Html.AntiForgeryToken()
                 <button type="submit" class="nav-link btn btn-link">Cerrar Sesión</button>
             </form>
-
 
         </li>
     }

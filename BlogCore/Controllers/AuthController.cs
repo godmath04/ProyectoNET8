@@ -56,8 +56,9 @@ public class AuthController : Controller
                 RedirectUri = "/"
             },
             CookieAuthenticationDefaults.AuthenticationScheme,
-            OpenIdConnectDefaults.AuthenticationScheme
-        );
+            "oidc" // ✅ Este es el nombre que usaste en AddOpenIdConnect
+            );
+
     }
 
 

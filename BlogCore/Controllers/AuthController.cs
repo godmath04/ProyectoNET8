@@ -8,17 +8,21 @@ using System.Security.Claims;
 
 public class AuthController : Controller
 {
+    private readonly IConfiguration _configuration;
+
+    public AuthController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     public IActionResult SignIn()
     {
-        
-        //return Challenge(new AuthenticationProperties { RedirectUri = "/" }, "oidc");
         return Challenge(new AuthenticationProperties { RedirectUri = "/auth/postlogin" }, "oidc");
     }
 
     [AllowAnonymous]
     public async Task<IActionResult> PostLogin()
     {
-        // 🧠 Obtener el token JWT emitido por Keycloak
         var idToken = await HttpContext.GetTokenAsync("id_token");
         Console.WriteLine($"🔐 ID Token: {idToken}");
 
@@ -45,21 +49,20 @@ public class AuthController : Controller
         return RedirectToAction("AccessDenied", "Home");
     }
 
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult SignOut()
     {
+        var keycloakLogoutUrl = $"{_configuration["Keycloak:Authority"]}/protocol/openid-connect/logout";
+        var postLogoutUri = Url.Action("Index", "Home", new { area = "" }, Request.Scheme);
+
         return SignOut(
             new AuthenticationProperties
             {
-                RedirectUri = "/"
+                RedirectUri = postLogoutUri
             },
             CookieAuthenticationDefaults.AuthenticationScheme,
-            "oidc" // ✅ Este es el nombre que usaste en AddOpenIdConnect
-            );
-
+            "oidc"
+        );
     }
-
-
 }

@@ -23,6 +23,9 @@ public class KeycloakAdminService : IKeycloakAdminService
         
         await EnsureTokenAsync();
         Console.WriteLine("Intentando crear usuario en Keycloak...");
+        // Validaciones para el mail del registro del usuario normal
+        Console.WriteLine($"🚀 CreateUserAsync iniciada para {model.Email}");
+
 
         var payload = new
         {
@@ -47,6 +50,8 @@ public class KeycloakAdminService : IKeycloakAdminService
         Console.WriteLine($"🌐 Realm desde configuración: {realm}");
 
         var response = await _httpClient.PostAsync($"/admin/realms/{realm}/users", content);
+        Console.WriteLine($"🧾 CreateUserAsync: response code {response.StatusCode}");
+
 
         Console.WriteLine($"🛠️ Respuesta de creación: {(int)response.StatusCode} - {response.ReasonPhrase}");
 

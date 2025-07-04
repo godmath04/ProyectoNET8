@@ -11,6 +11,7 @@
 </div>
 
 
+
 @if (Model.ListArticulos.Count() > 0)
 {
     <hr/>
@@ -58,4 +59,21 @@ else
     </nav>
 </div>
 
+@if (TempData["success"] != null)
+{
+    <script>
+        window.addEventListener("DOMContentLoaded", function () {
+            const alert = document.createElement("div");
+            alert.className = "alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4";
+            alert.style.zIndex = "9999";
+            alert.setAttribute("role", "alert");
+            alert.innerHTML = `
+                <strong>✅</strong> @TempData["success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        });
+    </script>
+}
 

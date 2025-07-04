@@ -14,7 +14,7 @@ namespace BlogCore.Models.ViewModels
         [Required]
         public string Password { get; set; }
 
-        [Required]
+        //[Required]
         public string Rol { get; set; }
     }
 }

@@ -1,0 +1,25 @@
+﻿@model BlogCore.Models.ViewModels.RegisterUsuarioViewModel
+@{
+    ViewData["Title"] = "Registro Cliente";
+}
+<h2>@ViewData["Title"]</h2>
+<form asp-action="Index" method="post">
+    <div class="mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Registrarse</button>
+</form>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

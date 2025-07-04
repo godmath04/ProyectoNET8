@@ -71,35 +71,70 @@ public class KeycloakAdminService : IKeycloakAdminService
         var realm = _config["Keycloak:Realm"];
         var clientId = await GetClientIdAsync();
 
-        // Get Role
-        Console.WriteLine($"🛠️ Asignando rol '{roleName}' al usuario {userId} en el cliente {clientId}");
-        var roleResponse = await _httpClient.GetAsync($"/admin/realms/{realm}/clients/{clientId}/roles/{roleName}");
-        var role = JsonDocument.Parse(await roleResponse.Content.ReadAsStringAsync()).RootElement;
+        Console.WriteLine($"🛠️ Intentando asignar rol '{roleName}' al usuario {userId}");
 
-        var roleObj = new[]
+        // Intentar como rol de cliente
+        var clientRoleResponse = await _httpClient.GetAsync($"/admin/realms/{realm}/clients/{clientId}/roles/{roleName}");
+
+        if (clientRoleResponse.IsSuccessStatusCode)
         {
+            var clientRole = JsonDocument.Parse(await clientRoleResponse.Content.ReadAsStringAsync()).RootElement;
+
+            var roleObj = new[]
+            {
             new
             {
-                id = role.GetProperty("id").GetString(),
-                name = role.GetProperty("name").GetString()
+                id = clientRole.GetProperty("id").GetString(),
+                name = clientRole.GetProperty("name").GetString()
             }
         };
 
-        Console.WriteLine($"🎯 Asignando rol '{roleName}' (ID: {roleObj[0].id}) al usuario con ID: {userId}");
+            Console.WriteLine($"🎯 Asignando rol '{roleName}' (Cliente ID: {roleObj[0].id}) al usuario con ID: {userId}");
 
+            var content = new StringContent(JsonSerializer.Serialize(roleObj), Encoding.UTF8, "application/json");
 
-        var content = new StringContent(JsonSerializer.Serialize(roleObj), Encoding.UTF8, "application/json");
+            var assignResponse = await _httpClient.PostAsync(
+                $"/admin/realms/{realm}/users/{userId}/role-mappings/clients/{clientId}", content
+            );
 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-        var assignResponse = await _httpClient.PostAsync(
-            $"/admin/realms/{realm}/users/{userId}/role-mappings/clients/{clientId}", content
-        );
+            Console.WriteLine($"🧾 Resultado de asignación (cliente): {(assignResponse.IsSuccessStatusCode ? "✅ Exitoso" : "❌ Falló")}");
+            return assignResponse.IsSuccessStatusCode;
+        }
 
-        Console.WriteLine($"🧾 Resultado de asignación: {(assignResponse.IsSuccessStatusCode ? "✅ Exitoso" : "❌ Falló")}");
+        // Si no se encuentra en cliente, intentar como rol de realm
+        Console.WriteLine($"🔁 Rol '{roleName}' no encontrado en cliente. Intentando como rol de realm...");
 
+        var realmRoleResponse = await _httpClient.GetAsync($"/admin/realms/{realm}/roles/{roleName}");
 
-        return assignResponse.IsSuccessStatusCode;
+        if (realmRoleResponse.IsSuccessStatusCode)
+        {
+            var realmRole = JsonDocument.Parse(await realmRoleResponse.Content.ReadAsStringAsync()).RootElement;
+
+            var roleObj = new[]
+            {
+            new
+            {
+                id = realmRole.GetProperty("id").GetString(),
+                name = realmRole.GetProperty("name").GetString()
+            }
+        };
+
+            Console.WriteLine($"🌐 Asignando realm-role '{roleName}' (ID: {roleObj[0].id}) al usuario {userId}");
+
+            var content = new StringContent(JsonSerializer.Serialize(roleObj), Encoding.UTF8, "application/json");
+
+            var assignResponse = await _httpClient.PostAsync(
+                $"/admin/realms/{realm}/users/{userId}/role-mappings/realm", content
+            );
+
+            Console.WriteLine($"🧾 Resultado de asignación (realm): {(assignResponse.IsSuccessStatusCode ? "✅ Exitoso" : "❌ Falló")}");
+            return assignResponse.IsSuccessStatusCode;
+        }
+
+        Console.WriteLine($"❌ No se encontró el rol '{roleName}' ni en cliente ni en realm.");
+        return false;
     }
+
 
     private async Task EnsureTokenAsync()
     {

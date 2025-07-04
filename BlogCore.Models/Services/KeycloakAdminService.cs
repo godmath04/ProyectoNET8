@@ -1,9 +1,10 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using BlogCore.Models.Services;
+﻿using BlogCore.Models.Services;
 using BlogCore.Models.ViewModels;
 using Microsoft.Extensions.Configuration;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 public class KeycloakAdminService : IKeycloakAdminService
 {
@@ -169,4 +170,72 @@ public class KeycloakAdminService : IKeycloakAdminService
         var client = clients.EnumerateArray().FirstOrDefault(c => c.GetProperty("clientId").GetString() == clientName);
         return client.GetProperty("id").GetString()!;
     }
+
+
+
+    //Metodo para obtener usuarios y luego podee mostrarlos
+    public async Task<IEnumerable<KhUserViewModel>> GetUsersAsync()
+    {
+        await EnsureTokenAsync();
+
+        var realm = _config["Keycloak:Realm"];
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+
+        var response = await _httpClient.GetAsync($"/admin/realms/{realm}/users");
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _accessToken = null;
+            await EnsureTokenAsync();
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+            response = await _httpClient.GetAsync($"/admin/realms/{realm}/users");
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var users = JsonSerializer.Deserialize<List<JsonElement>>(json);
+
+        return users.Select(u => new KhUserViewModel
+        {
+            Id = u.GetProperty("id").GetString(),
+            Email = u.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : "",
+            Nombre = u.TryGetProperty("firstName", out var firstNameProp) ? firstNameProp.GetString() : "",
+            Enabled = u.GetProperty("enabled").GetBoolean()
+        });
+    }
+
+
+    //Metodo para deshabilitar usuarios 
+    public async Task<bool> DisableUserAsync(string userId)
+    {
+        await EnsureTokenAsync();
+        var realm = _config["Keycloak:Realm"];
+        var payload = new { enabled = false };
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", _accessToken);
+        var resp = await _httpClient.PutAsync($"/admin/realms/{realm}/users/{userId}", content);
+        return resp.IsSuccessStatusCode;
+    }
+
+    //Metodo para habilitar usuarios
+    public async Task<bool> EnableUserAsync(string userId)
+    {
+        await EnsureTokenAsync();
+        var realm = _config["Keycloak:Realm"];
+        var payload = new { enabled = true };
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", _accessToken);
+        var resp = await _httpClient.PutAsync($"/admin/realms/{realm}/users/{userId}", content);
+        return resp.IsSuccessStatusCode;
+    }
+
+
+
+
+
+
 }

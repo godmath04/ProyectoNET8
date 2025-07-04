@@ -11,5 +11,14 @@ namespace BlogCore.Models.Services
     {
         Task<string> CreateUserAsync(RegisterUsuarioViewModel model);
         Task<bool> AssignRoleAsync(string userId, string roleName);
+
+        //Amplicacion para ver usuarios desde keycloak
+        Task<IEnumerable<KhUserViewModel>> GetUsersAsync();
+
+        
+        //Funciones para bloquear/desbloquear usuarios
+        Task<bool> DisableUserAsync(string userId);
+        Task<bool> EnableUserAsync(string userId);
+
     }
 }

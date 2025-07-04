@@ -1,6 +1,6 @@
-﻿@using BlogCore.Utilidades
-@model IEnumerable<ApplicationUser>
-
+﻿@using BlogCore.Models.ViewModels
+@using BlogCore.Utilidades
+@model IEnumerable<KhUserViewModel>
 @{
     ViewData["Title"] = "Lista de Usuarios";
 }
@@ -36,28 +36,31 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@Html.DisplayFor(m => item.Id)</td>
-                        <td>@Html.DisplayFor(m => item.Nombre)</td>
-                        <td>@Html.DisplayFor(m => item.Email)</td>
+                        <td>@item.Id</td>
+                        <td>@item.Nombre @item.Apellido</td>
+                        <td>@item.Email</td>
                         <td>
-                            @if (item.LockoutEnd == null || item.LockoutEnd < DateTime.Now)
+                            @if (item.Enabled)
                             {
-                                <a class="btn btn-success text-white" asp-action="Bloquear" style="width:50px" asp-route-id="@item.Id">
-                                    <i class="fas fa-lock-open"></i>
-                                </a>
-                                
+                                <form method="post" asp-action="Bloquear" asp-route-id="@item.Id" style="display:inline">
+                                    <button class="btn btn-danger" title="Bloquear usuario">
+                                        <i class="fas fa-lock"></i> Bloquear
+                                    </button>
+                                </form>
                             }
                             else
                             {
-                                <a class="btn btn-danger text-white" asp-action="Desbloquear" style="width:50px" asp-route-id="@item.Id">
-                                    <i class="fas fa-lock"></i>
-                                </a>
+                                <form method="post" asp-action="Desbloquear" asp-route-id="@item.Id" style="display:inline">
+                                    <button class="btn btn-success" title="Desbloquear usuario">
+                                        <i class="fas fa-lock-open"></i> Desbloquear
+                                    </button>
+                                </form>
                             }
                         </td>
-
-                    </tr>                    
+                    </tr>
                 }
             </tbody>
+
         </table>
 
         

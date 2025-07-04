@@ -1,4 +1,5 @@
 ﻿using BlogCore.AccesoDatos.Data.Repository.IRepository;
+using BlogCore.Models.Services;
 using BlogCore.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,49 +12,47 @@ namespace BlogCore.Areas.Admin.Controllers
     public class UsuariosController : Controller
     {
         private readonly IContenedorTrabajo _contenedorTrabajo;
+        private IKeycloakAdminService _kc;
 
-        public UsuariosController(IContenedorTrabajo contenedorTrabajo)
+        public UsuariosController(IContenedorTrabajo contenedorTrabajo, IKeycloakAdminService kc)
         {
             _contenedorTrabajo = contenedorTrabajo;
+            _kc = kc;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            //Opción 1: Obtener todos los usuario
-            //return View(_contenedorTrabajo.Usuario.GetAll());
+            var usuarios = (await _kc.GetUsersAsync()).ToList();
 
-            //Opción 2: Obtener todos los usuarios menos el que esté logueado, para no bloquearse el mismo
-            var claimsIdentity = (ClaimsIdentity)this.User.Identity;
-            var usuarioActual = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-            return View(_contenedorTrabajo.Usuario.GetAll(u => u.Id != usuarioActual.Value));
+            var claims = (ClaimsIdentity)User.Identity;
+            var currentId = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            usuarios = usuarios.Where(u => u.Id != currentId).ToList();
+
+            return View(usuarios);
+
+
         }
         [Authorize(Roles = CNT.GestorDeTickets + "," + CNT.AgenteSoporte)]
 
         [Authorize(Roles = CNT.GestorDeTickets + "," + CNT.AgenteSoporte)]
         [HttpPost]
-        public IActionResult Bloquear(string id)
+        public async Task<IActionResult> Bloquear(string id)
         {
-            var usuario = _contenedorTrabajo.Usuario.GetFirstOrDefault(u => u.Id == id);
-            if (usuario == null)
-                return NotFound();
+            var success = await _kc.DisableUserAsync(id);
+            TempData["success"] = success ? "Usuario bloqueado." : "Error al bloquear.";
+            return RedirectToAction(nameof(Index));
+        }
 
-            usuario.LockoutEnd = DateTime.Now.AddYears(100); // bloqueo permanente
-            _contenedorTrabajo.Save();
-
+        [HttpPost]
+        public async Task<IActionResult> Desbloquear(string id)
+        {
+            var success = await _kc.EnableUserAsync(id);
+            TempData["success"] = success ? "Usuario desbloqueado." : "Error al desbloquear.";
             return RedirectToAction(nameof(Index));
         }
 
 
-        [HttpGet]
-        public IActionResult Desbloquear(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            _contenedorTrabajo.Usuario.DesbloquearUsuario(id);
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

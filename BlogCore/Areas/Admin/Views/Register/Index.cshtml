@@ -1,0 +1,44 @@
+﻿@using BlogCore.Utilidades
+@model BlogCore.Models.ViewModels.RegisterUsuarioViewModel
+@{
+    ViewData["Title"] = "Registrar Usuario";
+}
+
+<h2>Registrar nuevo usuario</h2>
+
+<form asp-action="Index" method="post">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-6"><h4>Seleccionar Rol de Usuario</h4></div>
+        <div class="col-5">
+            <input type="radio" asp-for="Rol" value="@CNT.GestorDeTickets" /> @CNT.GestorDeTickets
+            <input type="radio" asp-for="Rol" value="@CNT.AgenteSoporte" /> @CNT.AgenteSoporte
+            <span asp-validation-for="Rol" class="text-danger"></span>
+
+        </div>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

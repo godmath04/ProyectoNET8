@@ -3,6 +3,7 @@ using BlogCore.AccesoDatos.Data.Repository;
 using BlogCore.AccesoDatos.Data.Repository.IRepository;
 using BlogCore.Data;
 using BlogCore.Models;
+using BlogCore.Models.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -33,6 +34,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 // 🧠 Repositorio y Siembra
 builder.Services.AddScoped<IContenedorTrabajo, ContenedorTrabajo>();
 builder.Services.AddScoped<IInicializadorBD, InicializadorBD>();
+builder.Services.AddHttpClient<IKeycloakAdminService, KeycloakAdminService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Keycloak:BaseUrl"]);
+});
+
 
 // 🍪 Política de cookies
 builder.Services.Configure<CookiePolicyOptions>(options =>
@@ -139,6 +145,8 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default_no_area",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+//app.MapRazorPages();
 
 app.Run();
 

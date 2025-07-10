@@ -1,4 +1,5 @@
 ﻿using BlogCore.AccesoDatos.Data.Repository.IRepository;
+using BlogCore.Models.Services;
 using BlogCore.Models.ViewModels;
 using BlogCore.Utilidades;
 using Microsoft.AspNetCore.Authorization;
@@ -6,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogCore.Areas.Admin.Controllers
 {
-    [Authorize(Roles = CNT.GestorDeTickets +"," + CNT.AgenteSoporte)]
+    [Authorize(Roles = CNT.GestorDeTickets + "," + CNT.AgenteSoporte)]
     [Area("Admin")]
     public class ArticulosController : Controller
     {
         private readonly IContenedorTrabajo _contenedorTrabajo;
         private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public ArticulosController(IContenedorTrabajo contenedorTrabajo, 
+        public ArticulosController(IContenedorTrabajo contenedorTrabajo,
             IWebHostEnvironment hostingEnvironment)
         {
             _contenedorTrabajo = contenedorTrabajo;
@@ -76,7 +77,7 @@ namespace BlogCore.Areas.Admin.Controllers
             }
 
             artiVM.ListaCategorias = _contenedorTrabajo.Categoria.GetListaCategorias();
-            return View(artiVM); 
+            return View(artiVM);
         }
 
         [HttpGet]
@@ -123,7 +124,7 @@ namespace BlogCore.Areas.Admin.Controllers
                     {
                         System.IO.File.Delete(rutaImagen);
                     }
-        
+
                     //Nuevamente subimos el archivo
                     using (var fileStreams = new FileStream(Path.Combine(subidas, nombreArchivo + extension), FileMode.Create))
                     {
@@ -183,5 +184,52 @@ namespace BlogCore.Areas.Admin.Controllers
             return Json(new { success = true, message = "Artículo Borrado Correctamente" });
         }
         #endregion
+
+        //Metodo para probar el kms
+
+        public IActionResult ProbarKms()
+        {
+             
+            var rutaCredenciales = "C:\\Users\\luisp\\Downloads\\dark-star-465316-e8-5ae99cd6df1b.json";
+
+            var kms = new KmsService(rutaCredenciales);
+            var texto = "Artículo secreto de BlogCore";
+
+            var cifrado = kms.Cifrar(texto);
+            var descifrado = kms.Descifrar(cifrado);
+
+            return Content($"Original: {texto}\n\nCifrado: {cifrado}\n\nDescifrado: {descifrado}");
+        }
+
+        //Metodo para exponer los articulos como admin
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "GestorDeTickets")]
+        public IActionResult ObtenerArticuloCifrado(int id)
+        {
+            var articulo = _contenedorTrabajo.Articulo.Get(id);
+            if (articulo == null)
+                return NotFound();
+
+            var kms = new KmsService("C:\\Users\\luisp\\Downloads\\dark-star-465316-e8-5ae99cd6df1b.json");
+            var contenidoCifrado = kms.Cifrar(articulo.Descripcion);
+
+
+            var dto = new ArticuloCifradoDTO
+            {
+                Id = articulo.Id,
+                Nombre = articulo.Nombre,
+                ContenidoCifrado = contenidoCifrado
+            };
+
+            return Ok(dto);
+        }
+
+
+
+
+
     }
+
+
 }

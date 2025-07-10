@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +53,8 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = "oidc";
+    //Con bearer para la comunicacion con la app moviedux
+    //options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddCookie()
 .AddOpenIdConnect("oidc", options =>
@@ -113,7 +117,45 @@ builder.Services.AddAuthentication(options =>
             context.Principal = principal;
         }
     };
+})
+.AddJwtBearer("Bearer", options =>
+{
+    options.Authority = builder.Configuration["Keycloak:Authority"];
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Keycloak:Authority"],
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        RoleClaimType = ClaimTypes.Role // 👈 Esto es opcional porque lo mapeamos manualmente
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var identity = context.Principal.Identity as ClaimsIdentity;
+            var realmAccess = identity?.FindFirst("realm_access")?.Value;
+
+            if (!string.IsNullOrEmpty(realmAccess))
+            {
+                var roles = JObject.Parse(realmAccess)["roles"]?.ToObject<List<string>>() ?? new List<string>();
+                foreach (var role in roles)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                    Console.WriteLine($"🔐 Rol mapeado desde token Bearer: {role}");
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
+
+
+
 
 builder.Services.AddControllersWithViews();
 

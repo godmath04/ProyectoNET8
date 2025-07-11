@@ -224,12 +224,6 @@ namespace BlogCore.Areas.Admin.Controllers
 
             return Ok(dto);
         }
-
-
-
-
-
     }
-
 
 }

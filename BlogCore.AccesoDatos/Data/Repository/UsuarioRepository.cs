@@ -21,15 +21,31 @@ namespace BlogCore.AccesoDatos.Data.Repository
         public void BloquearUsuario(string IdUsuario)
         {
             var usuarioDesdeBd = _db.ApplicationUser.FirstOrDefault(u => u.Id == IdUsuario);
-            usuarioDesdeBd.LockoutEnd = DateTime.Now.AddYears(1000);
-            _db.SaveChanges();
+
+            if (usuarioDesdeBd != null)
+            {
+                usuarioDesdeBd.LockoutEnd = DateTime.Now.AddYears(1000);
+                _db.SaveChanges();
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se encontró el usuario con ID {IdUsuario} para bloquear.");
+            }
         }
 
         public void DesbloquearUsuario(string IdUsuario)
         {
             var usuarioDesdeBd = _db.ApplicationUser.FirstOrDefault(u => u.Id == IdUsuario);
-            usuarioDesdeBd.LockoutEnd = DateTime.Now;
-            _db.SaveChanges();
+
+            if (usuarioDesdeBd != null)
+            {
+                usuarioDesdeBd.LockoutEnd = DateTime.Now;
+                _db.SaveChanges();
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se encontró el usuario con ID {IdUsuario} para desbloquear.");
+            }
         }
     }
 }

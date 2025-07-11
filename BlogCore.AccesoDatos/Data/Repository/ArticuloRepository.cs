@@ -26,12 +26,22 @@ namespace BlogCore.AccesoDatos.Data.Repository
         public void Update(Articulo articulo)
         {
             var objDesdeDb = _db.Articulo.FirstOrDefault(s => s.Id == articulo.Id);
-            objDesdeDb.Nombre = articulo.Nombre;
-            objDesdeDb.Descripcion = articulo.Descripcion;
-            objDesdeDb.UrlImagen = articulo.UrlImagen;
-            objDesdeDb.CategoriaId = articulo.CategoriaId;
 
-            //_db.SaveChanges();
+            if (objDesdeDb != null)
+            {
+                objDesdeDb.Nombre = articulo.Nombre;
+                objDesdeDb.Descripcion = articulo.Descripcion;
+                objDesdeDb.UrlImagen = articulo.UrlImagen;
+                objDesdeDb.CategoriaId = articulo.CategoriaId;
+
+              
+            }
+            else
+            {
+                // Opcional: lanzar una excepción o registrar que no se encontró
+                throw new InvalidOperationException($"No se encontró el artículo con ID {articulo.Id} para actualizar.");
+            }
         }
+
     }
 }

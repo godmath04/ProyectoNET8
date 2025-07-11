@@ -18,15 +18,25 @@ namespace BlogCore.AccesoDatos.Data.Repository
         {
             _db = db;
         }
-       
+
 
         public void Update(Slider slider)
         {
             var objDesdeDb = _db.Slider.FirstOrDefault(s => s.Id == slider.Id);
-            objDesdeDb.Nombre = slider.Nombre;
-            objDesdeDb.Estado = slider.Estado;
-            objDesdeDb.UrlImagen = slider.UrlImagen;
+
+            if (objDesdeDb != null)
+            {
+                objDesdeDb.Nombre = slider.Nombre;
+                objDesdeDb.Estado = slider.Estado;
+                objDesdeDb.UrlImagen = slider.UrlImagen;
+
+
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se encontró el slider con ID {slider.Id} para actualizar.");
+            }
 
         }
     }
-}
+    }

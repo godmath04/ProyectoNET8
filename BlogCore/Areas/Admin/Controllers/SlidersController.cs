@@ -157,23 +157,27 @@ namespace BlogCore.Areas.Admin.Controllers
         public IActionResult Delete(int id)
         {
             var sliderDesdeBd = _contenedorTrabajo.Slider.Get(id);
-            string rutaDirectorioPrincipal = _hostingEnvironment.WebRootPath;
-            var rutaImagen = Path.Combine(rutaDirectorioPrincipal, sliderDesdeBd.UrlImagen.TrimStart('\\'));
-            if (System.IO.File.Exists(rutaImagen))
-            {
-                System.IO.File.Delete(rutaImagen);
-            }
 
-
+            // Validar primero si es null
             if (sliderDesdeBd == null)
             {
                 return Json(new { success = false, message = "Error borrando slider" });
             }
 
+            string rutaDirectorioPrincipal = _hostingEnvironment.WebRootPath;
+            var rutaImagen = Path.Combine(rutaDirectorioPrincipal, sliderDesdeBd.UrlImagen?.TrimStart('\\') ?? "");
+
+            if (System.IO.File.Exists(rutaImagen))
+            {
+                System.IO.File.Delete(rutaImagen);
+            }
+
             _contenedorTrabajo.Slider.Remove(sliderDesdeBd);
             _contenedorTrabajo.Save();
+
             return Json(new { success = true, message = "Slider Borrado Correctamente" });
         }
+
         #endregion
     }
 }

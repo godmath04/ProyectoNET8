@@ -166,24 +166,28 @@ namespace BlogCore.Areas.Admin.Controllers
         public IActionResult Delete(int id)
         {
             var articuloDesdeBd = _contenedorTrabajo.Articulo.Get(id);
-            string rutaDirectorioPrincipal = _hostingEnvironment.WebRootPath;
-            var rutaImagen = Path.Combine(rutaDirectorioPrincipal, articuloDesdeBd.UrlImagen.TrimStart('\\'));
-            if (System.IO.File.Exists(rutaImagen))
-            {
-                System.IO.File.Delete(rutaImagen);
-            }
-
 
             if (articuloDesdeBd == null)
             {
                 return Json(new { success = false, message = "Error borrando artículo" });
             }
 
+            // ✅ Solo si el artículo no es null, intento eliminar la imagen
+            string rutaImagen = Path.Combine(
+                _hostingEnvironment.WebRootPath,
+                articuloDesdeBd.UrlImagen?.TrimStart('\\') ?? "");
+
+            if (!string.IsNullOrEmpty(rutaImagen) && System.IO.File.Exists(rutaImagen))
+            {
+                System.IO.File.Delete(rutaImagen);
+            }
+
             _contenedorTrabajo.Articulo.Remove(articuloDesdeBd);
             _contenedorTrabajo.Save();
+
             return Json(new { success = true, message = "Artículo Borrado Correctamente" });
         }
-        #endregion
+
 
         //Metodo para probar el kms
 
@@ -225,5 +229,7 @@ namespace BlogCore.Areas.Admin.Controllers
             return Ok(dto);
         }
     }
+
+    #endregion
 
 }

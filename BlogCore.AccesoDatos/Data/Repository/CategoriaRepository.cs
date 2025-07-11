@@ -31,10 +31,19 @@ namespace BlogCore.AccesoDatos.Data.Repository
         public void Update(Categoria categoria)
         {
             var objDesdeDb = _db.Categoria.FirstOrDefault(s => s.Id == categoria.Id);
-            objDesdeDb.Nombre = categoria.Nombre;
-            objDesdeDb.Orden = categoria.Orden;
 
-            //_db.SaveChanges();
+            if (objDesdeDb != null)
+            {
+                objDesdeDb.Nombre = categoria.Nombre;
+                objDesdeDb.Orden = categoria.Orden;
+
+                
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se encontró la categoría con ID {categoria.Id} para actualizar.");
+            }
         }
+
     }
 }
